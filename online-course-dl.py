@@ -45,18 +45,6 @@ def _doWrap(text):
 # list of plugins
 plugins = []
 
-email_address = ''
-password = ''
-csrf_token = ''
-
-cj = cookielib.CookieJar()
-opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
-login_data = urllib.urlencode({
-	'email_address' : email_address, 
-	'password' : password, 
-	'csrf_token' : csrf_token
-})
-
 def load_plugins():
 	"""
 	Find plugins, and load them for use.
@@ -192,12 +180,3 @@ def main():
 
 if __name__ == "__main__":
 	main()
-
-	# do login
-	# print cj
-	# resp = opener.open('https://www.coursera.org/maestro/auth/api/user/login', login_data) #line 7123 from js
-	# print cj
-	# resp = opener.open('https://class.coursera.org/nlp/auth/auth_redirector?type=login&subtype=normal', login_data)
-	# print cj
-	# resp = opener.open('https://class.coursera.org/nlp/lecture/index')
-	# print resp.read()[7000:10000]
