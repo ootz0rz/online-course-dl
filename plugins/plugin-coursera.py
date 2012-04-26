@@ -6,7 +6,7 @@ class PluginCoursera(LinksProvider):
     """
     name = "Coursera"
     desc = "Coursera Course Downloader"
-    help = "See -h for flag usage, look for flags prefixed with 'sera'"
+    help = '''See -h for flag usage, look for flags prefixed with 'sera'. Specifically, you must provide the username, password and course short-hand.'''
     prefix = "sera"
 
     def __init__(self, argsparser):

@@ -44,5 +44,7 @@ class ArgsParser(argparse.ArgumentParser):
 
     def plugin_add_argument(self, *args, **kwargs):
         if 'help' in kwargs:
-            kwargs['help'] = self.wrapper.fill(textwrap.dedent(kwargs['help'][1:])) + '\n'*2
-            return self.add_argument(*args, **kwargs)
+            kwargs['help'] = self.wrapper.fill(
+                textwrap.dedent(kwargs['help'][1:])) + '\n'*2
+
+        return self.add_argument(*args, **kwargs)
