@@ -16,6 +16,14 @@ class PluginMount(type):
     def get_plugins(self, *args, **kwargs):
         return [p(*args, **kwargs) for p in self.plugins]
 
+class Downloader:
+    """
+    A 'downloader' instance. This contains all the information required to let
+    the main application download the specified file.
+    """
+    
+    url = ""
+
 class LinksProvider:
     """
     Mount point for plugins. All plugins should be stored in the /plugins/

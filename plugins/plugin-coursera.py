@@ -42,3 +42,5 @@ class PluginCoursera(LinksProvider):
                 Look at the URL for the course after logging in to see what the short-hand is.
 
                 Ex: for Natural Language Programming, it's "nlp"''' % self.name)
+
+        self.argsparser = argsparser

@@ -16,7 +16,6 @@ import subprocess
 import StringIO
 from BeautifulSoup import BeautifulSoup
 from plugins import *
-from wrapper import *
 from ArgsParser import *
 
 #### config -------------------------------------------------------------------
@@ -137,6 +136,12 @@ def setup_arguments_parser():
 			 * all: for a list of all plugins.
 
 			 * #|name: to see more information on a specific plugin. You may use either the plugin # or the plugin name (if any) that is shown via "-l all"''')
+
+parser.plugin_add_argument('-o', '--out', dest = 'output_path',
+		default = None,
+		action = 'store',
+		help = '''
+			Path to output to. If the path does not exist, it will be created.''')
 
 def main():
 	setup_arguments_parser()
