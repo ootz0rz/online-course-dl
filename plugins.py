@@ -25,15 +25,6 @@ class Downloadable:
 	A 'Downloadable' instance. This contains all the information required to 
 	let the main application download the specified file.
 	"""
-	# The file to download
-	url = ""
-
-	# The file name to save as
-	output_name = ""
-
-	# The sub-path to download the file to, if any
-	sub_folder = ""
-
 	# Types for file_type
 	File_Types = enum(
 		# Just download, no extras
@@ -46,11 +37,27 @@ class Downloadable:
 		# 'contents' to disk.
 		'STRING')
 
-	# The type of file this is. By default, we assume this is a "normal" file.
-	file_type = File_Types.FILE
+	def __init__(self, 
+		url="", 
+		output_name="", 
+		sub_folder="", 
+		file_type=File_Types.FILE, 
+		contents=""):
+		# The file to download
+		self.url = url
 
-	# This is only used if file_type is set to File_Types.STRING
-	contents = ""
+		# The file name to save as
+		self.output_name = output_name
+
+		# The sub-path to download the file to, if any
+		self.sub_folder = sub_folder
+
+		# The type of file this is. By default, we assume this is a "normal" file.
+		self.file_type = file_type
+
+		# This is only used if file_type is set to File_Types.STRING
+		self.contents = contents
+
 
 class LinksProvider:
 	"""
