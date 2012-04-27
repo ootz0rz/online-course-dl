@@ -128,8 +128,8 @@ class PluginCoursera(LinksProvider):
 			header = list_header_links[i]
 			folder = file_name_format % (i + 1, self.__get_file_from_header(header.string))
 
-			print '_' * 80
-			print i, 'folder:', folder
+			# print '_' * 80
+			# print i, 'folder:', folder
 
 			# get all list items for this section
 			j = 0
@@ -143,25 +143,27 @@ class PluginCoursera(LinksProvider):
 				li_href = li_lecture_link['href']
 				assert len(li_title) > 0, "Couldn't get lecture title"
 
-				print i, j, "title:", li_title
-				print i, j, "link:", li_href
+				# print '-' * 30
+				# print i, j, "title:", li_title
+				# print i, j, "link:", li_href
 
-				if len(li_href) > 0:
+				# if len(li_href) > 0:
 					# TODO stuff to get the content that pops up while watching
 					# one of the videos
-					print
+					# print
 
 				# set all the resources as downloadable
 				for li_res in li.div('a'):
 					li_res_extension = self._get_file_type_from_title(li_res['title'])
 					li_res_href = li_res['href']
 					li_res_fname = li_title + "." + li_res_extension
-					print li_res_fname, "<--", li_res_href 
+
+					# print i, j, li_res_fname#, "<--", li_res_href 
 
 					ndb = Downloadable(
 							url = li_res_href,
 							output_name = li_res_fname,
-							sub_folder = os.path.join(folder, li_title)
+							sub_folder = os.path.join(key, os.path.join(folder, li_title))
 						)
 					o.append(ndb)
 
@@ -198,6 +200,7 @@ class PluginCoursera(LinksProvider):
 		Given the header string, return a string that would be a valid 
 		file/folder name.
 		"""
+		header_string = header_string.replace(":", "-")
 		header_string = unicodedata.normalize('NFKD', header_string).encode('ascii', 'ignore')
 		header_string = unicode(re.sub('[^\w\s-]', '', header_string).strip().lower())
 

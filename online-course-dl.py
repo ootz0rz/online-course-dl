@@ -4,10 +4,13 @@ Let's you download an entire course to your hard drive for later use from a
 variety of online course websites. 
 
 This script presents a pluggable method for download courses from various 
-sites. Additional site support can be added via plugins.
+sites. Additional site support can be added via plugins (see plugins.py)
 
 Author: Hardeep Singh (ootz0rz at gee mail dot com)
 		< https://github.com/ootz0rz/ >
+
+Some code based on John Lehmann's Coursera Downloader:
+		< https://github.com/jplehmann/coursera >
 """
 import sys, os, re, string
 import urllib, urllib2, cookielib 
@@ -153,12 +156,21 @@ def setup_arguments_parser():
 			 * #|name: to see more information on a specific plugin. You may use either the plugin # or the plugin name (if any) that is shown via "-l all"''')
 
 	parser.plugin_add_argument('-o', '--out', dest = 'output_path',
+		default = os.getcwd(),
+		action = 'store',
+		help = '''
+			Path to output to. If the path does not exist, it will be created. By default, this is the CWD.''')
+
+	parser.plugin_add_argument('-w', '--wget', dest = 'wget_bin',
 		default = None,
 		action = 'store',
 		help = '''
-			Path to output to. If the path does not exist, it will be created.''')
+			Path to wget executable, if available.''')
 
 def main():
+	"""
+	Program entry point.
+	"""
 	setup_arguments_parser()
 	load_plugins()
 	args = parser.parse_args()
@@ -176,7 +188,75 @@ def main():
 		# run the plugin, then process Downloadables
 		cur_plugin = o[0]
 		print "Plugin to run:", cur_plugin
-		print cur_plugin.start()
+
+		dls = cur_plugin.start()
+		_start_downloads(dls, cur_plugin.cj, args.output_path, args.wget_bin)
+		
+
+def _start_downloads(dlist, cookiejar, output_path, wget_bin):
+	"""
+	Download every 'Downloadable' given in the list dlist.
+	"""
+	print "Got (%d) links from plugin, starting downloads..." % len(dlist)
+
+	for dl in dlist:
+		print "Downloading", dl
+		full_path = os.path.join(output_path, dl.sub_folder)
+		full_path = os.path.join(full_path, dl.output_name)
+
+		download_file(
+			dl.url,
+			full_path,
+			cookiejar,
+			wget_bin
+		)
+
+def download_file(url, fn, cookiejar, wget_bin):
+	"""
+	Downloads file and removes current file if aborted by user.
+	"""
+	try:
+		# create the path if need be
+		basedir = os.path.dirname(fn)
+		if not os.path.isdir(basedir):
+			os.makedirs(basedir)
+
+		if wget_bin is not None:
+			download_file_wget(wget_bin, url, fn, cookiejar)
+		else:
+			download_file_nowget(url, fn, cookiejar)
+
+	except KeyboardInterrupt, e: 
+		print "\nKeyboard Interrupt -- Removing partial file:", fn
+		os.remove(fn)
+		sys.exit()
+
+def download_file_nowget(url, fn, cookiejar):
+	"""
+	'Native' python downloader -- slower than wget.
+	"""
+	print "Downloading %s -> %s" % (url, fn)
+	urlfile = get_opener(cookiejar).open(url)
+	chunk_sz = 1048576
+	bytesread = 0
+	f = open(fn, "wb")
+
+	while True:
+		data = urlfile.read(chunk_sz)
+		if not data:
+			print "."
+			break
+
+		f.write(data)
+		bytesread += len(data)
+		print "\r%d bytes read" % bytesread,
+		sys.stdout.flush()
+
+def get_opener(cookiejar):
+	"""
+	Use cookie jar to create a url opener.
+	"""
+	return urllib2.build_opener(urllib2.HTTPCookieProcessor(cookiejar))
 
 if __name__ == "__main__":
 	main()
