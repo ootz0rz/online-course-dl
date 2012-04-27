@@ -8,10 +8,11 @@ Currently supports:
  * Udacity (soon, hopefully)
 
 Sample usage:
-	Download the Natural Language Processing course from Coursera:
+
+*	Download the Natural Language Processing course from Coursera:
 	`python online-course-dl.py -p sera -sera_u YOUR_USERNAME -sera_p YOUR_PASS -sera_c nlp`
 
-	Download using wget instead of the python downloader (MUST faster!):
+*	Download using wget instead of the python downloader (MUST faster!):
 	`python online-course-dl.py -p sera -sera_u YOUR_USERNAME -sera_p YOUR_PASS -sera_c nlp -w wget`
 
 	( Windows can get wget from: http://gnuwin32.sourceforge.net/packages/wget.htm )
