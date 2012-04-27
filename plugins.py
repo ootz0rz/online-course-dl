@@ -1,3 +1,5 @@
+import cookielib
+
 # Based on http://martyalchin.com/2008/jan/10/simple-plugin-framework/
 class PluginMount(type):
 	def __init__(self, name, bases, attrs):
@@ -58,6 +60,12 @@ class Downloadable:
 		# This is only used if file_type is set to File_Types.STRING
 		self.contents = contents
 
+	def __str__(self):
+		return "Downloadable<%s, %s, %s, %s>" % (self.url, self.output_name, self.sub_folder, self.file_type)
+
+	def __repr__(self):
+		return self.__str__()
+
 
 class LinksProvider:
 	"""
@@ -101,7 +109,9 @@ class LinksProvider:
 								argparse.ArgumentParser.add_argument()
 							but will format the "help" parameter for you.
 
-		Do all your plugin initialization here
+		Do all your plugin initialization here. Note that if your downloader
+		makes use of cookies, make sure to use the already provided CookieJar
+		"self.cj".
 
 	start(self):
 		Runs the plugin. Should return a list of "Downloadable" objects for the
@@ -118,7 +128,7 @@ class LinksProvider:
 	prefix = ""
 
 	def __init__(self, argsparser):
-		pass
+		self.cj = cookielib.CookieJar()
 
 	def start(self):
 		return self.get_downloadables()

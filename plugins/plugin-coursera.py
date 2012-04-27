@@ -26,6 +26,8 @@ class PluginCoursera(LinksProvider):
 	}
 
 	def __init__(self, argsparser):
+		LinksProvider.__init__(self, argsparser)
+
 		self.cache = {}
 		self.pages = {}
 
@@ -109,9 +111,8 @@ class PluginCoursera(LinksProvider):
 
 		o = []
 		
-		print "Get Downloadables[%s]" % (key)
+		print "Get Downloadables[%s]..." % (key)
 
-		print 'soup', type(soup)
 		item_list = soup("div", "item_list")[0]
 		list_header_links = item_list('h3', 'list_header')
 		lists = item_list('ul', 'item_section_list')
@@ -122,13 +123,12 @@ class PluginCoursera(LinksProvider):
 
 		# find all downloadables per title
 		i = 0
+		file_name_format = "%02d - %s"
 		for ul in lists:
 			header = list_header_links[i]
-			folder = "%d - %s" % (i + 1, self.__get_file_from_header(header.string))
+			folder = file_name_format % (i + 1, self.__get_file_from_header(header.string))
 
-			# print "-" * 80
-			# print i, header.name, header.string
-			# print i, ul.name#, ul
+			print '_' * 80
 			print i, 'folder:', folder
 
 			# get all list items for this section
@@ -139,16 +139,59 @@ class PluginCoursera(LinksProvider):
 				
 				# filename/title and link so we can download any content that
 				# may pop up during the video itself
-				li_title = "%d - %s" % (j + 1, self.__get_file_from_header(li_lecture_link.contents[0]))
+				li_title = file_name_format % (j + 1, self.__get_file_from_header(li_lecture_link.contents[0]))
 				li_href = li_lecture_link['href']
+				assert len(li_title) > 0, "Couldn't get lecture title"
+
 				print i, j, "title:", li_title
 				print i, j, "link:", li_href
+
+				if len(li_href) > 0:
+					# TODO stuff to get the content that pops up while watching
+					# one of the videos
+					print
+
+				# set all the resources as downloadable
+				for li_res in li.div('a'):
+					li_res_extension = self._get_file_type_from_title(li_res['title'])
+					li_res_href = li_res['href']
+					li_res_fname = li_title + "." + li_res_extension
+					print li_res_fname, "<--", li_res_href 
+
+					ndb = Downloadable(
+							url = li_res_href,
+							output_name = li_res_fname,
+							sub_folder = os.path.join(folder, li_title)
+						)
+					o.append(ndb)
 
 				j = j + 1
 
 			i = i + 1
 
 		return o
+
+	def _get_file_type_from_title(self, title):
+		"""
+		Given a title from one of the 'div.item_resource > a' links, return
+		the suitable file extension to use.
+		"""
+		title = title.lower()
+
+		if title == "ppt" or title == "pdf":
+			return title
+
+		if "subtitles" in title:
+			if "text" in title:
+				return "txt"
+			if "srt" in title:
+				return "srt"
+
+		if "video" in title:
+			if "mp4" in title:
+				return "mp4"
+
+		return "unknown"
 
 	def __get_file_from_header(self, header_string):
 		"""
@@ -164,7 +207,7 @@ class PluginCoursera(LinksProvider):
 		"""
 		Login to Coursera course.
 		"""
-		cj = self.cj = cookielib.CookieJar()
+		cj = self.cj
 		opener = self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cj))
 		login_data = self.login_data = urllib.urlencode({
 			'email_address' : self.args.sera_user, 
