@@ -128,7 +128,7 @@ class LinksProvider:
 	prefix = ""
 
 	def __init__(self, argsparser):
-		self.cj = cookielib.CookieJar()
+		self.cj = cookielib.LWPCookieJar()#cookielib.CookieJar()
 
 	def start(self):
 		return self.get_downloadables()

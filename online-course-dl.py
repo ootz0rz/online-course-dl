@@ -199,19 +199,70 @@ def _start_downloads(dlist, cookiejar, output_path, wget_bin):
 	"""
 	print "Got (%d) links from plugin, starting downloads..." % len(dlist)
 
-	for dl in dlist:
-		print "Downloading", dl
-		full_path = os.path.join(output_path, dl.sub_folder)
-		full_path = os.path.join(full_path, dl.output_name)
+	# should we write out a cookies file?
+	cookies_file = ""
+	if wget_bin is not None:
+		cookies_file = create_cookies_txt(cookiejar)
 
-		download_file(
-			dl.url,
-			full_path,
-			cookiejar,
-			wget_bin
-		)
+	try:
+		for dl in dlist:
+			print "Downloading", dl
+			full_path = os.path.join(output_path, dl.sub_folder)
+			full_path = os.path.join(full_path, dl.output_name)
 
-def download_file(url, fn, cookiejar, wget_bin):
+			download_file(
+				dl.url,
+				full_path,
+				cookiejar,
+				cookies_file,
+				wget_bin
+			)
+	finally:
+		if len(cookies_file) > 0:
+			os.remove(cookies_file)
+
+
+def create_cookies_txt(cookiejar):
+	"""
+	Write a temporary Netscape cookies.txt file to disk, and return the 
+	location.
+	"""
+	import tempfile
+	from contextlib import closing
+	# spec: http://www.cookiecentral.com/faq/#3.5
+
+	tmp = tempfile.mkstemp(prefix="ocd-cj")
+	path = tmp[1]
+	fd = tmp[0]
+
+	print fd, path
+	
+	with open(path, 'w') as f:
+		NETSCAPE_HEADER = "# Netscape HTTP Cookie File\n"
+  		f.write(NETSCAPE_HEADER);
+		for c in cookiejar:
+			f.write(_get_cookie_line(c))
+			f.write('\n')
+
+	return path
+
+def _get_cookie_line(c):
+	"""
+	Given a cookie, format it in the netscape cookies.txt spec
+	"""
+	cookie_line = '%(domain)s\t%(flag)s\t%(path)s\t%(secure)s\t%(expiration)s\t%(name)s\t%(value)s'
+
+	return cookie_line % {
+			"domain": 		c.domain,
+			"flag": 		"TRUE",
+			"path": 		c.path,
+			"secure": 		"TRUE" if c.secure else "FALSE",
+			"expiration": 	c.expires,
+			"name": 		c.name,
+			"value":		c.value
+		}
+
+def download_file(url, fn, cookiejar, cookies_file, wget_bin):
 	"""
 	Downloads file and removes current file if aborted by user.
 	"""
@@ -222,14 +273,24 @@ def download_file(url, fn, cookiejar, wget_bin):
 			os.makedirs(basedir)
 
 		if wget_bin is not None:
-			download_file_wget(wget_bin, url, fn, cookiejar)
+			download_file_wget(wget_bin, url, fn, cookies_file)
 		else:
 			download_file_nowget(url, fn, cookiejar)
 
 	except KeyboardInterrupt, e: 
 		print "\nKeyboard Interrupt -- Removing partial file:", fn
 		os.remove(fn)
-		sys.exit()
+
+		raise e
+
+def download_file_wget(wget_bin, url, fn, cookies_file):
+	"""
+	Downloads a file using wget.  Could possibly use python to stream files to
+	disk, but wget is robust and gives nice visual feedback.
+	"""
+	cmd = [wget_bin, url, "-O", fn, "--load-cookies", cookies_file, "--no-check-certificate"]
+	print "Executing wget:", cmd 
+	retcode = subprocess.call(cmd)
 
 def download_file_nowget(url, fn, cookiejar):
 	"""
