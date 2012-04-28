@@ -128,9 +128,6 @@ class PluginCoursera(LinksProvider):
 			header = list_header_links[i]
 			folder = file_name_format % (i + 1, self.__get_file_from_header(header.string))
 
-			# print '_' * 80
-			# print i, 'folder:', folder
-
 			# get all list items for this section
 			j = 0
 			for li in ul('li', 'item_row'):
@@ -141,11 +138,7 @@ class PluginCoursera(LinksProvider):
 				# may pop up during the video itself
 				li_title = file_name_format % (j + 1, self.__get_file_from_header(li_lecture_link.contents[0]))
 				li_href = li_lecture_link['href']
-				assert len(li_title) > 0, "Couldn't get lecture title"
-
-				# print '-' * 30
-				# print i, j, "title:", li_title
-				# print i, j, "link:", li_href
+				# assert len(li_title) > 0, "Couldn't get lecture title"
 
 				# if len(li_href) > 0:
 					# TODO stuff to get the content that pops up while watching
@@ -157,8 +150,6 @@ class PluginCoursera(LinksProvider):
 					li_res_extension = self._get_file_type_from_title(li_res['title'])
 					li_res_href = li_res['href']
 					li_res_fname = li_title + "." + li_res_extension
-
-					# print i, j, li_res_fname#, "<--", li_res_href 
 
 					ndb = Downloadable(
 							url = li_res_href,
