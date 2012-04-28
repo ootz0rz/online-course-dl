@@ -10,10 +10,10 @@ Currently supports:
 Sample usage:
 
 *	Download the Natural Language Processing course from Coursera:
-	`python online-course-dl.py -p sera -sera_u YOUR_USERNAME -sera_p YOUR_PASS -sera_c nlp`
+	`python online-course-dl.py -p sera -a "-u YOUR_USERNAME -p YOUR_PASS -c nlp"`
 
 *	Download using wget instead of the python downloader (MUST faster!):
-	`python online-course-dl.py -p sera -sera_u YOUR_USERNAME -sera_p YOUR_PASS -sera_c nlp -w wget`
+	`python online-course-dl.py -p sera -a "-u YOUR_USERNAME -p YOUR_PASS -c nlp" -w wget`
 
 	( Windows can get wget from: http://gnuwin32.sourceforge.net/packages/wget.htm )
 

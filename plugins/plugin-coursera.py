@@ -243,15 +243,5 @@ class PluginCoursera(LinksProvider):
 		"""
 		args = self.args = self.argsparser.parse_args(arguments)
 
-		# errFmt = "--%s: %s"
-		# if args.user is None:
-		# 	raise AttributeError(errFmt % ("user", "Username is required."))
-
-		# if args.password is None:
-		# 	raise AttributeError(errFmt % ("pass", "Password is required."))
-
-		# if args.course is None:
-		# 	raise AttributeError(errFmt % ("course", "Course short-hand is required."))
-
 		self.course = args.course
 

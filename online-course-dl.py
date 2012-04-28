@@ -98,14 +98,12 @@ def _find_plugin(pname):
 	if isinstance(val, int):
 		for o in plugins:
 			if val == i:
-				# _print_plugin_info(o, i, True)
 				return (o, i)
 
 			i = i + 1
 	else:
 		for o in plugins:
 			if val == o.prefix:
-				# _print_plugin_info(o, i, True)
 				return (o, i)
 
 			i = i + 1
@@ -126,8 +124,6 @@ def _print_plugin_info(plugin, number, verbose=False):
 		print "Plugin Documentation:"
 		print _doWrap(plugin.help)
 		print
-		print
-		# plugin.argsparser.print_usage()
 		plugin.argsparser.print_help()
 
 def setup_arguments_parser():
