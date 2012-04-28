@@ -1,4 +1,5 @@
 import cookielib
+from ArgsParser import *
 
 # Based on http://martyalchin.com/2008/jan/10/simple-plugin-framework/
 class PluginMount(type):
@@ -92,8 +93,11 @@ class LinksProvider:
 
 	And the following methods:
 
-	__init__(self, argsparser):
-		argsparser      -   An instance of ArgsParser. If you intend to use any
+	__init__(self):
+		Do all your plugin initialization here.
+
+		Instance Variables:
+		self.argsparser -   An instance of ArgsParser. If you intend to use any
 							of the arguments, might want to keep an instance of
 							this saved somewhere so you can reference the 
 							values given, if any.
@@ -109,15 +113,20 @@ class LinksProvider:
 								argparse.ArgumentParser.add_argument()
 							but will format the "help" parameter for you.
 
-		Do all your plugin initialization here. Note that if your downloader
-		makes use of cookies, make sure to use the already provided CookieJar
-		"self.cj".
+		self.cj - 			If your downloader makes use of cookies, make sure 
+							to use the already provided CookieJar "self.cj". It
+							will be used to send cookie data to the downloader
+							in the main script.
 
-	start(self):
+	start(self, arguments):
 		Runs the plugin. Should return a list of "Downloadable" objects for the
 		main application to download.
 
-	get_downloadablesself):
+		Parameters:
+		arguments - 		This is a list of arguments as expected for
+							ArgsParser (i.e. argparse.ArgumentParser)
+
+	get_downloadables(self):
 		Returns the list of "Downloadable" objects.
 	"""
 	__metaclass__ = PluginMount
@@ -127,10 +136,11 @@ class LinksProvider:
 	help = ""
 	prefix = ""
 
-	def __init__(self, argsparser):
+	def __init__(self):
+		self.argsparser = ArgsParser(add_help=False)
 		self.cj = cookielib.LWPCookieJar()#cookielib.CookieJar()
 
-	def start(self):
+	def start(self, arguments):
 		return self.get_downloadables()
 
 	def get_downloadables(self):

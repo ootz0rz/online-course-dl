@@ -31,6 +31,7 @@ class DocWrapper(textwrap.TextWrapper):
 
 class ArgsParser(argparse.ArgumentParser):
     def __init__(self, *args, **kwargs):
+        kwargs['formatter_class'] = argparse.RawTextHelpFormatter
         argparse.ArgumentParser.__init__(self, *args, **kwargs)
 
         wrapper = DocWrapper()

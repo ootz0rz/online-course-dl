@@ -11,7 +11,7 @@ class PluginCoursera(LinksProvider):
 	"""
 	name = "Coursera"
 	desc = "Coursera Course Downloader"
-	help = '''See -h for flag usage, look for flags prefixed with 'sera'. Specifically, you must provide the username, password and course short-hand.'''
+	help = '''You must provide the username, password and course short-hand.'''
 	prefix = "sera"
 
 	base = "https://www.coursera.org/" # main site
@@ -25,44 +25,19 @@ class PluginCoursera(LinksProvider):
 		}
 	}
 
-	def __init__(self, argsparser):
-		LinksProvider.__init__(self, argsparser)
+	def __init__(self):
+		LinksProvider.__init__(self)
 
 		self.cache = {}
 		self.pages = {}
 
-		self.argsparser = argsparser
+		self._setup_argsparser()
 
-		argsparser.plugin_add_argument('-sera_u', '--sera_user', 
-			dest = 'sera_user',
-			action = 'store',
-			default = None,
-			help = '''
-				[%s][REQUIRED] Username to log in to Coursera.''' % self.name)
-
-		argsparser.plugin_add_argument('-sera_p', '--sera_pass', 
-			dest = 'sera_pass',
-			action = 'store',
-			default = None,
-			help = '''
-				[%s][REQUIRED] Password to log in to Coursera.''' % self.name)
-
-		argsparser.plugin_add_argument('-sera_c', '--sera_course', 
-			dest = 'sera_course',
-			action = 'store',
-			default = None,
-			help = '''
-				[%s][REQUIRED] Course short-hand name to download.
-
-				Look at the URL for the course after logging in to see what the short-hand is.
-
-				Ex: for Natural Language Programming, it's "nlp"''' % self.name)
-
-	def start(self):
+	def start(self, arguments):
 		"""
 		Start gathering data from the specified Coursera course to download
 		"""
-		self._check_args()
+		self._check_args(arguments)
 		self._login()
 
 		self._get_page_by_key('lectures')
@@ -75,6 +50,37 @@ class PluginCoursera(LinksProvider):
 		o = o + self._get_downloadables_from__video_lectures()
 
 		return o
+
+	def _setup_argsparser(self):
+		argsparser = self.argsparser
+
+		argsparser.plugin_add_argument('-u', '--user', 
+			dest = 'user',
+			action = 'store',
+			default = None,
+			required = True,
+			help = '''
+				[%s][REQUIRED] Username to log in to Coursera.''' % self.name)
+
+		argsparser.plugin_add_argument('-p', '--pass', 
+			dest = 'password',
+			action = 'store',
+			default = None,
+			required = True,
+			help = '''
+				[%s][REQUIRED] Password to log in to Coursera.''' % self.name)
+
+		argsparser.plugin_add_argument('-c', '--course', 
+			dest = 'course',
+			action = 'store',
+			default = None,
+			required = True,
+			help = '''
+				[%s][REQUIRED] Course short-hand name to download.
+
+				Look at the URL for the course after logging in to see what the short-hand is.
+
+				Ex: for Natural Language Programming, it's "nlp"''' % self.name)
 
 	def _get_page_by_key(self, key, force=False):
 		"""
@@ -204,8 +210,8 @@ class PluginCoursera(LinksProvider):
 		cj = self.cj
 		opener = self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cj))
 		login_data = self.login_data = urllib.urlencode({
-			'email_address' : self.args.sera_user, 
-			'password' : self.args.sera_pass, 
+			'email_address' : self.args.user, 
+			'password' : self.args.password,
 			'csrf_token' : ""
 		})
 
@@ -231,21 +237,21 @@ class PluginCoursera(LinksProvider):
 	def _get_course_key_url(self, key):
 		return self.URLs['COURSE'][key] % self.course
 
-	def _check_args(self):
+	def _check_args(self, arguments):
 		"""
 		Check that all arguments are provided and valid.
 		"""
-		args = self.args = self.argsparser.parse_args()
+		args = self.args = self.argsparser.parse_args(arguments)
 
-		errFmt = "--%s: %s"
-		if args.sera_user is None:
-			raise AttributeError(errFmt % ("sera_user", "Username is required."))
+		# errFmt = "--%s: %s"
+		# if args.user is None:
+		# 	raise AttributeError(errFmt % ("user", "Username is required."))
 
-		if args.sera_pass is None:
-			raise AttributeError(errFmt % ("sera_pass", "Password is required."))
+		# if args.password is None:
+		# 	raise AttributeError(errFmt % ("pass", "Password is required."))
 
-		if args.sera_course is None:
-			raise AttributeError(errFmt % ("sera_course", "Course short-hand is required."))
+		# if args.course is None:
+		# 	raise AttributeError(errFmt % ("course", "Course short-hand is required."))
 
-		self.course = args.sera_course
+		self.course = args.course
 

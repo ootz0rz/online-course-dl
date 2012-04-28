@@ -30,9 +30,7 @@ PLUGINS_PATH = os.path.join(os.getcwd(), "plugins")
 PLUGIN_BASE_INDEX = 1
 
 # init parser
-parser = ArgsParser(
-	description = "Download online courses!", 
-	formatter_class=argparse.RawTextHelpFormatter)
+parser = ArgsParser(description = "Download online courses!")
 
 # init wrapper
 wrapper = DocWrapper()
@@ -53,7 +51,7 @@ def load_plugins():
 	Find plugins, and load them for use.
 	"""
 	import imp
-	global parser, plugins
+	global plugins
 
 	# import plugins
 	i = 1
@@ -65,7 +63,7 @@ def load_plugins():
 				module = imp.load_source("plugin%s" % i, load_path)
 
 	# init each plugin
-	plugins = LinksProvider.get_plugins(parser)
+	plugins = LinksProvider.get_plugins()
 
 def list_plugins(pname):
 	"""
@@ -127,6 +125,10 @@ def _print_plugin_info(plugin, number, verbose=False):
 		print
 		print "Plugin Documentation:"
 		print _doWrap(plugin.help)
+		print
+		print
+		# plugin.argsparser.print_usage()
+		plugin.argsparser.print_help()
 
 def setup_arguments_parser():
 	"""
@@ -135,6 +137,19 @@ def setup_arguments_parser():
 	Note that plugins are allowed to add their own optional arguments
 	"""
 	global parser
+
+	parser.plugin_add_argument('-a', '--args', dest = 'plugin_args', 
+		default = "",
+		action = 'store',
+		help = '''
+			Arguments to send to the plugin. For a list of arguments to send to a specific plugin, use "-l [#|name]". Use "-l all" to list all plugins.
+
+			Ex: 
+			if the plugin takes the arguments...
+
+			'-p [SOME NUMBER]' and '-u [SOME TEXT]'
+
+			you would input: -a "-p 123 -u foo"''')
 
 	parser.plugin_add_argument('-p', '--plugin', dest = 'plugin_name', 
 		default = None,
@@ -187,9 +202,9 @@ def main():
 
 		# run the plugin, then process Downloadables
 		cur_plugin = o[0]
-		print "Plugin to run:", cur_plugin
+		print "Plugin to run:", cur_plugin.name, "<%s>" % cur_plugin.desc
 
-		dls = cur_plugin.start()
+		dls = cur_plugin.start(args.plugin_args.split())
 		_start_downloads(dls, cur_plugin.cj, args.output_path, args.wget_bin)
 		
 
